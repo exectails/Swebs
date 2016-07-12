@@ -57,16 +57,16 @@ namespace Swebs
 		/// <param name="conf"></param>
 		public Server(Configuration conf)
 		{
-			this.HttpServer = new HttpServer();
-			this.HttpServer.EndPoint = new IPEndPoint(this.Conf.Host, this.Conf.Port);
-			this.HttpServer.RequestReceived += this.OnRequestReceived;
-
 			this.Conf = conf;
 			this.RootPath = Path.GetFullPath(this.Conf.RootPath).NormalizePath();
 
 			this.FileAccessHandler = new FileRequest(this.Conf.FileTypeHandlers.ToDictionary(a => a.Key, b => b.Value));
 			this.DirectoryListingHandler = new DirectoryListing(this.RootPath);
 			this.Error404Handler = new Error404();
+
+			this.HttpServer = new HttpServer();
+			this.HttpServer.EndPoint = new IPEndPoint(this.Conf.Host, this.Conf.Port);
+			this.HttpServer.RequestReceived += this.OnRequestReceived;
 		}
 
 		/// <summary>
