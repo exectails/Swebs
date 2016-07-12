@@ -1,0 +1,85 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{EAB12CB4-B358-4C9D-9C3E-6661FD96DB06}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Swebs</RootNamespace>
+    <AssemblyName>Swebs</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="3rdParty\NHttp\HttpClient.cs" />
+    <Compile Include="3rdParty\NHttp\HttpContext.cs" />
+    <Compile Include="3rdParty\NHttp\HttpCookie.cs" />
+    <Compile Include="3rdParty\NHttp\HttpCookieCollection.cs" />
+    <Compile Include="3rdParty\NHttp\HttpExceptionEventHandler.cs" />
+    <Compile Include="3rdParty\NHttp\HttpFileCollection.cs" />
+    <Compile Include="3rdParty\NHttp\HttpMultiPartItem.cs" />
+    <Compile Include="3rdParty\NHttp\HttpMultiPartRequestParser.cs" />
+    <Compile Include="3rdParty\NHttp\HttpOutputStream.cs" />
+    <Compile Include="3rdParty\NHttp\HttpPostedFile.cs" />
+    <Compile Include="3rdParty\NHttp\HttpReadBuffer.cs" />
+    <Compile Include="3rdParty\NHttp\HttpRequest.cs" />
+    <Compile Include="3rdParty\NHttp\HttpRequestEventHandler.cs" />
+    <Compile Include="3rdParty\NHttp\HttpRequestParser.cs" />
+    <Compile Include="3rdParty\NHttp\HttpResponse.cs" />
+    <Compile Include="3rdParty\NHttp\HttpServer.cs" />
+    <Compile Include="3rdParty\NHttp\HttpServerState.cs" />
+    <Compile Include="3rdParty\NHttp\HttpServerUtility.cs" />
+    <Compile Include="3rdParty\NHttp\HttpTimeoutManager.cs" />
+    <Compile Include="3rdParty\NHttp\HttpUnknownRequestParser.cs" />
+    <Compile Include="3rdParty\NHttp\HttpUrlEncodedRequestParser.cs" />
+    <Compile Include="3rdParty\NHttp\HttpUtil.cs" />
+    <Compile Include="3rdParty\NHttp\ILog.cs" />
+    <Compile Include="3rdParty\NHttp\LogManager.cs" />
+    <Compile Include="3rdParty\NHttp\NHttpException.cs" />
+    <Compile Include="3rdParty\NHttp\ProtocolException.cs" />
+    <Compile Include="Configuration.cs" />
+    <Compile Include="RequestHandler.cs" />
+    <Compile Include="RequestHandlers\DirectoryListing.cs" />
+    <Compile Include="RequestHandlers\Error404.cs" />
+    <Compile Include="RequestHandlers\FileRequest.cs" />
+    <Compile Include="RequestHandlers\RawOutput.cs" />
+    <Compile Include="Server.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
