@@ -81,19 +81,5 @@ namespace Swebs
 
 			this.FileTypeHandlers.Add(".cs", new CSharpScript());
 		}
-
-		public IRequestHandler GetFileTypeHandler(string extension)
-		{
-			IRequestHandler result;
-			if (this.FileTypeHandlers.TryGetValue(extension, out result))
-				return result;
-
-			if (this.FileTypeHandlers.TryGetValue("", out result))
-				return result;
-
-			this.FileTypeHandlers.Add("", result = new RawOutput("application/octet-stream"));
-
-			return result;
-		}
 	}
 }

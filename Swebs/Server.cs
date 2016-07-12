@@ -58,8 +58,10 @@ namespace Swebs
 		public Server(Configuration conf)
 		{
 			this.HttpServer = new HttpServer();
-			this.Conf = conf;
+			this.HttpServer.EndPoint = new IPEndPoint(this.Conf.Host, this.Conf.Port);
+			this.HttpServer.RequestReceived += this.OnRequestReceived;
 
+			this.Conf = conf;
 			this.RootPath = Path.GetFullPath(this.Conf.RootPath).NormalizePath();
 
 			this.FileAccessHandler = new FileRequest(this.Conf.FileTypeHandlers.ToDictionary(a => a.Key, b => b.Value));
@@ -80,8 +82,6 @@ namespace Swebs
 		/// </summary>
 		public void Start()
 		{
-			this.HttpServer.EndPoint = new IPEndPoint(this.Conf.Host, this.Conf.Port);
-			this.HttpServer.RequestReceived += this.OnRequestReceived;
 			this.HttpServer.Start();
 		}
 

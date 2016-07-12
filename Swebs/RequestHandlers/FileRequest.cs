@@ -17,7 +17,7 @@ namespace Swebs.RequestHandlers
 	/// </remarks>
 	public class FileRequest : IRequestHandler
 	{
-		public IDictionary<string, IRequestHandler> _handlers;
+		private IDictionary<string, IRequestHandler> _handlers;
 
 		/// <summary>
 		/// Creates new instance of FileRequest.
