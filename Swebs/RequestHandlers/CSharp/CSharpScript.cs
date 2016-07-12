@@ -63,7 +63,21 @@ namespace Swebs.RequestHandlers.CSharp
 			if (script != null)
 				contents = script.Render(args);
 			else
-				contents = "Failed to render page from script.";
+			{
+				var sb = new StringBuilder();
+
+				sb.AppendLine("<!DOCTYPE html>");
+				sb.AppendLine("<html>");
+				sb.AppendLine("<head>");
+				sb.AppendLine("<title>Compilation failure</title>");
+				sb.AppendLine("</head>");
+				sb.AppendLine("<body>");
+				sb.AppendLine("<p>Failed to render page from script.</p>");
+				sb.AppendLine("</body>");
+				sb.AppendLine("</html>");
+
+				contents = sb.ToString();
+			}
 
 			// Send
 			using (var output = response.OutputStream)
