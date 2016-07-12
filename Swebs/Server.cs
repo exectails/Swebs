@@ -61,7 +61,7 @@ namespace Swebs
 			this.RootPath = Path.GetFullPath(this.Conf.RootPath).NormalizePath();
 
 			this.FileAccessHandler = new FileRequest(this.Conf.FileTypeHandlers.ToDictionary(a => a.Key, b => b.Value));
-			this.DirectoryListingHandler = new DirectoryListing(this.RootPath);
+			this.DirectoryListingHandler = new DirectoryListing();
 			this.Error404Handler = new Error404();
 
 			this.HttpServer = new HttpServer();

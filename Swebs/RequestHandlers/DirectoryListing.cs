@@ -14,17 +14,6 @@ namespace Swebs.RequestHandlers
 	/// </summary>
 	public class DirectoryListing : IRequestHandler
 	{
-		public string _rootPath;
-
-		/// <summary>
-		/// Creates new instance of DirectoryListing.
-		/// </summary>
-		/// <param name="rootPath"></param>
-		public DirectoryListing(string rootPath)
-		{
-			_rootPath = rootPath;
-		}
-
 		/// <summary>
 		/// Handles request by sending back a list of files and folders in
 		/// the requested path.
@@ -56,9 +45,10 @@ namespace Swebs.RequestHandlers
 			if (string.IsNullOrWhiteSpace(directoryName))
 				directoryName = "/";
 
+			var split = requestPath.NormalizePath().Split('/');
 			var backPath = "/";
-			if (!string.IsNullOrWhiteSpace(requestPath))
-				backPath += Path.GetDirectoryName(requestPath).Replace(_rootPath, "");
+			if (split.Length > 1)
+				backPath += string.Join("/", split.Take(split.Length - 1));
 
 			var sb = new StringBuilder();
 
@@ -85,7 +75,7 @@ namespace Swebs.RequestHandlers
 				sb.AppendLine("</tr>");
 
 				sb.AppendLine("<tr>");
-				sb.AppendFormat("<td><a href='{0}'>Parent Directory</a></td>", backPath);
+				sb.AppendFormat("<td><a href=\"{0}\">Parent Directory</a></td>", backPath);
 				sb.AppendLine("<td></td>");
 				sb.AppendLine("<td></td>");
 				sb.AppendLine("</tr>");
@@ -93,13 +83,10 @@ namespace Swebs.RequestHandlers
 				foreach (var filePath in Directory.EnumerateDirectories(localPath, "*", SearchOption.TopDirectoryOnly))
 				{
 					var name = Path.GetFileName(filePath);
-					var linkPath = filePath.Replace(_rootPath, "");
-					linkPath = linkPath.NormalizePath();
-					if (!linkPath.StartsWith("/"))
-						linkPath = "/" + linkPath;
+					var linkPath = "/" + Path.Combine(requestPath, name).NormalizePath();
 
 					sb.AppendLine("<tr>");
-					sb.AppendFormat("<td>[D] <a href='{0}'>{1}</a></td>", linkPath, name);
+					sb.AppendFormat("<td>[D] <a href=\"{0}\">{1}</a></td>", linkPath, name);
 					sb.AppendFormat("<td>{0:yyyy-MM-dd HH:mm:ss}</td>", Directory.GetLastWriteTime(filePath));
 					sb.AppendFormat("<td>-</td>");
 					sb.AppendLine("</tr>");
@@ -108,13 +95,10 @@ namespace Swebs.RequestHandlers
 				foreach (var filePath in Directory.EnumerateFiles(localPath, "*", SearchOption.TopDirectoryOnly))
 				{
 					var name = Path.GetFileName(filePath);
-					var linkPath = filePath.Replace(_rootPath, "");
-					linkPath = linkPath.NormalizePath();
-					if (!linkPath.StartsWith("/"))
-						linkPath = "/" + linkPath;
+					var linkPath = "/" + Path.Combine(requestPath, name).NormalizePath();
 
 					sb.AppendLine("<tr>");
-					sb.AppendFormat("<td>[F] <a href='{0}'>{1}</a></td>", linkPath, name);
+					sb.AppendFormat("<td>[F] <a href=\"{0}\">{1}</a></td>", linkPath, name);
 					sb.AppendFormat("<td>{0:yyyy-MM-dd HH:mm:ss}</td>", File.GetLastWriteTime(filePath));
 					sb.AppendFormat("<td>{0}</td>", this.GetSizeString(filePath));
 					sb.AppendLine("</tr>");
