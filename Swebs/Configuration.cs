@@ -51,6 +51,8 @@ namespace Swebs
 
 			this.FileTypeHandlers.Add(".xml", new RawOutput("text/xml"));
 			this.FileTypeHandlers.Add(".txt", new RawOutput("text/plain"));
+
+			this.FileTypeHandlers.Add(".cs", new CSharpScript());
 		}
 
 		public IRequestHandler GetFileTypeHandler(string extension)

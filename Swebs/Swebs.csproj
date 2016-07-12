@@ -67,6 +67,9 @@
     <Compile Include="3rdParty\NHttp\ProtocolException.cs" />
     <Compile Include="Configuration.cs" />
     <Compile Include="RequestHandler.cs" />
+    <Compile Include="RequestHandlers\CSharp\CSharpScript.cs" />
+    <Compile Include="RequestHandlers\CSharp\ErrorScript.cs" />
+    <Compile Include="RequestHandlers\CSharp\IScript.cs" />
     <Compile Include="RequestHandlers\DirectoryListing.cs" />
     <Compile Include="RequestHandlers\Error404.cs" />
     <Compile Include="RequestHandlers\FileRequest.cs" />
