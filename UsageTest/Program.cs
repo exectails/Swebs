@@ -16,7 +16,8 @@ namespace UsageTest
 		{
 			var webConf = new Configuration();
 			webConf.Port = 8181;
-			webConf.RootPath = "public";
+			//webConf.SourcePaths.Add("public2");
+			webConf.SourcePaths.Add("public");
 
 			var server = new Server(webConf);
 			server.HttpServer.RequestReceived += (s, e) => Console.WriteLine("[{0}] - {1}", e.Request.HttpMethod, e.Request.Path);

@@ -25,9 +25,18 @@ namespace Swebs
 		public int Port { get; set; }
 
 		/// <summary>
-		/// The server's root path.
+		/// The server's root paths.
 		/// </summary>
-		public string RootPath { get; set; }
+		/// <remarks>
+		/// Setting more than one path will make the server search for
+		/// requested files in all of them, with the first path
+		/// having the highest priority.
+		/// 
+		/// Since the server will handle the first valid path it finds,
+		/// directory listing will only list the files from the first
+		/// directory it finds.
+		/// </remarks>
+		public List<string> SourcePaths { get; set; }
 
 		/// <summary>
 		/// Whether to allow listing of directory contents.
@@ -53,7 +62,7 @@ namespace Swebs
 			this.Host = IPAddress.Any;
 			this.Port = 80;
 
-			this.RootPath = "./";
+			this.SourcePaths = new List<string>();
 			this.AllowDirectoryListing = true;
 
 			this.IndexNames = new List<string>();

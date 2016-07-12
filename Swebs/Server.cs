@@ -28,9 +28,9 @@ namespace Swebs
 		internal Configuration Conf { get; private set; }
 
 		/// <summary>
-		/// The absolute root path of the web server.
+		/// The server's root paths.
 		/// </summary>
-		internal string RootPath { get; private set; }
+		internal List<string> SourcePaths { get; private set; }
 
 		/// <summary>
 		/// The request handler for normal files.
@@ -58,7 +58,7 @@ namespace Swebs
 		public Server(Configuration conf)
 		{
 			this.Conf = conf;
-			this.RootPath = Path.GetFullPath(this.Conf.RootPath).NormalizePath();
+			this.SourcePaths = this.Conf.SourcePaths.Select(a => Path.GetFullPath(a).NormalizePath()).ToList();
 
 			this.FileAccessHandler = new FileRequest(this.Conf.FileTypeHandlers.ToDictionary(a => a.Key, b => b.Value));
 			this.DirectoryListingHandler = new DirectoryListing();
@@ -96,37 +96,41 @@ namespace Swebs
 			requestPath = args.Server.UrlDecode(requestPath);
 			requestPath = requestPath.Trim('/');
 
-			var localPath = Path.Combine(this.RootPath, requestPath);
-			localPath = args.Server.UrlDecode(localPath);
-			localPath = localPath.NormalizePath();
+			foreach (var rootPath in this.SourcePaths)
+			{
+				var localPath = Path.Combine(rootPath, requestPath);
+				localPath = args.Server.UrlDecode(localPath);
+				localPath = localPath.NormalizePath();
 
-			// Check scope
-			var fullRequestPath = Path.GetFullPath(localPath).NormalizePath().TrimEnd('/');
-			var fullRootPath = Path.GetFullPath(this.RootPath).NormalizePath().TrimEnd('/');
-			if (!fullRequestPath.StartsWith(fullRootPath))
-			{
-				this.Error404Handler.Handle(args, requestPath, localPath);
-				return;
+				// Check scope
+				var fullRequestPath = Path.GetFullPath(localPath).NormalizePath().TrimEnd('/');
+				var fullRootPath = Path.GetFullPath(rootPath).NormalizePath().TrimEnd('/');
+				if (!fullRequestPath.StartsWith(fullRootPath))
+				{
+					//this.Error404Handler.Handle(args, requestPath, localPath);
+					//return;
+					continue;
+				}
+
+				// Check index files
+				var fileExists = File.Exists(localPath);
+				if (!fileExists)
+					fileExists = this.TestIndexNames(this.Conf.IndexNames, ref localPath);
+
+				// Handle request
+				if (fileExists)
+				{
+					this.FileAccessHandler.Handle(args, requestPath, localPath);
+					return;
+				}
+				else if (this.Conf.AllowDirectoryListing && Directory.Exists(localPath))
+				{
+					this.DirectoryListingHandler.Handle(args, requestPath, localPath);
+					return;
+				}
 			}
 
-			// Check index files
-			var fileExists = File.Exists(localPath);
-			if (!fileExists)
-				fileExists = this.TestIndexNames(this.Conf.IndexNames, ref localPath);
-
-			// Handle request
-			if (fileExists)
-			{
-				this.FileAccessHandler.Handle(args, requestPath, localPath);
-			}
-			else if (this.Conf.AllowDirectoryListing && Directory.Exists(localPath))
-			{
-				this.DirectoryListingHandler.Handle(args, requestPath, localPath);
-			}
-			else
-			{
-				this.Error404Handler.Handle(args, requestPath, localPath);
-			}
+			this.Error404Handler.Handle(args, requestPath, null);
 		}
 
 		/// <summary>
