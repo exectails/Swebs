@@ -38,7 +38,7 @@ namespace Swebs.RequestHandlers
 		{
 			var request = args.Request;
 			var response = args.Response;
-			var extension = Path.GetExtension(localPath);
+			var extension = Path.GetExtension(localPath).ToLower();
 			var handler = this.GetFileTypeHandler(extension);
 
 			handler.Handle(args, requestPath, localPath);
