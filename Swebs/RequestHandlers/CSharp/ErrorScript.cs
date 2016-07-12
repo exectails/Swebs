@@ -33,12 +33,19 @@ namespace Swebs.RequestHandlers.CSharp
 		{
 			var sb = new StringBuilder();
 
+			sb.AppendLine("<!DOCTYPE html>");
+			sb.AppendLine("<html>");
+			sb.AppendLine("<head>");
+			sb.AppendLine("<title>Compilation failure</title>");
+			sb.AppendLine("</head>");
+			sb.AppendLine("<body>");
+			sb.AppendLine("<h1>Error in script</h1>");
 			sb.AppendFormat("<pre>");
 			foreach (CompilerError error in _errors)
-			{
 				sb.AppendFormat("{0}\n", error);
-			}
 			sb.AppendFormat("</pre>");
+			sb.AppendLine("</body>");
+			sb.AppendLine("</html>");
 
 			return sb.ToString();
 		}
