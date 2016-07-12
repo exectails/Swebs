@@ -12,16 +12,49 @@ using System.Threading.Tasks;
 
 namespace Swebs
 {
+	/// <summary>
+	/// Wrapper around HttpServer that manages basic tasks.
+	/// </summary>
 	public class Server : IDisposable
 	{
+		/// <summary>
+		/// The internal HttpServer.
+		/// </summary>
 		public HttpServer HttpServer { get; private set; }
+
+		/// <summary>
+		/// The server's currently loaded configuration.
+		/// </summary>
 		internal Configuration Conf { get; private set; }
+
+		/// <summary>
+		/// The absolute root path of the web server.
+		/// </summary>
 		internal string RootPath { get; private set; }
 
+		/// <summary>
+		/// The request handler for normal files.
+		/// </summary>
 		public IRequestHandler FileAccessHandler { get; set; }
+
+		/// <summary>
+		/// The request handler for directories.
+		/// </summary>
+		/// <remarks>
+		/// If directory listing is disabled via the configuration,
+		/// Error404Handler is called instead.
+		/// </remarks>
 		public IRequestHandler DirectoryListingHandler { get; set; }
+
+		/// <summary>
+		/// The request handler for non-existent or invalid files.
+		/// </summary>
 		public IRequestHandler Error404Handler { get; set; }
 
+		/// <summary>
+		/// Creates new Server instance.
+		/// </summary>
+		/// <param name="conf"></param>
 		public Server(Configuration conf)
 		{
 			this.HttpServer = new HttpServer();
@@ -34,11 +67,17 @@ namespace Swebs
 			this.Error404Handler = new Error404();
 		}
 
+		/// <summary>
+		/// Disposes used resources.
+		/// </summary>
 		public void Dispose()
 		{
 			this.HttpServer.Dispose();
 		}
 
+		/// <summary>
+		/// Starts HTTP server.
+		/// </summary>
 		public void Start()
 		{
 			this.HttpServer.EndPoint = new IPEndPoint(this.Conf.Host, this.Conf.Port);
@@ -46,6 +85,11 @@ namespace Swebs
 			this.HttpServer.Start();
 		}
 
+		/// <summary>
+		/// Called when a request comes in.
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="args"></param>
 		private void OnRequestReceived(object sender, HttpRequestEventArgs args)
 		{
 			var requestPath = args.Request.Path.NormalizePath();
@@ -85,6 +129,14 @@ namespace Swebs
 			}
 		}
 
+		/// <summary>
+		/// Checks given path is a directory that contains an index file.
+		/// If so, the path is set to that index file's path and true
+		/// is returned.
+		/// </summary>
+		/// <param name="names"></param>
+		/// <param name="localPath"></param>
+		/// <returns></returns>
 		private bool TestIndexNames(IList<string> names, ref string localPath)
 		{
 			if (Directory.Exists(localPath))
@@ -106,6 +158,11 @@ namespace Swebs
 
 	public static class StringExtension
 	{
+		/// <summary>
+		/// Replaces backward-slashes with forward-slashes.
+		/// </summary>
+		/// <param name="path"></param>
+		/// <returns></returns>
 		public static string NormalizePath(this string path)
 		{
 			return path.Replace('\\', '/');

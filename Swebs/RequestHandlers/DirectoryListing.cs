@@ -9,15 +9,29 @@ using System.Threading.Tasks;
 
 namespace Swebs.RequestHandlers
 {
+	/// <summary>
+	/// Request handler for directory lists.
+	/// </summary>
 	public class DirectoryListing : IRequestHandler
 	{
 		public string _rootPath;
 
+		/// <summary>
+		/// Creates new instance of DirectoryListing.
+		/// </summary>
+		/// <param name="rootPath"></param>
 		public DirectoryListing(string rootPath)
 		{
 			_rootPath = rootPath;
 		}
 
+		/// <summary>
+		/// Handles request by sending back a list of files and folders in
+		/// the requested path.
+		/// </summary>
+		/// <param name="args"></param>
+		/// <param name="requestPath"></param>
+		/// <param name="localPath"></param>
 		public void Handle(HttpRequestEventArgs args, string requestPath, string localPath)
 		{
 			var request = args.Request;
@@ -30,6 +44,12 @@ namespace Swebs.RequestHandlers
 				writer.Write(list);
 		}
 
+		/// <summary>
+		/// Returns directory listing page.
+		/// </summary>
+		/// <param name="requestPath"></param>
+		/// <param name="localPath"></param>
+		/// <returns></returns>
 		private string RenderDirectoryList(string requestPath, string localPath)
 		{
 			var directoryName = "/" + requestPath;
@@ -113,6 +133,11 @@ namespace Swebs.RequestHandlers
 			return sb.ToString();
 		}
 
+		/// <summary>
+		/// Returns size for the given file as string.
+		/// </summary>
+		/// <param name="filePath"></param>
+		/// <returns></returns>
 		private string GetSizeString(string filePath)
 		{
 			var result = new FileInfo(filePath).Length;

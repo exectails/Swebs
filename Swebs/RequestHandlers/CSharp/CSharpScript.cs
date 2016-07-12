@@ -10,12 +10,26 @@ using System.Threading.Tasks;
 
 namespace Swebs.RequestHandlers.CSharp
 {
+	/// <summary>
+	/// C# script request handler.
+	/// </summary>
+	/// <remarks>
+	/// Allows for C# scripts to be called directly, with them creating the
+	/// output. Similar in functionality to PHP on Apache.
+	/// </remarks>
 	public class CSharpScript : IRequestHandler
 	{
 		private Dictionary<string, IScript> _cache = new Dictionary<string, IScript>();
 
+		/// <summary>
+		/// References passed to the compiler.
+		/// </summary>
 		public HashSet<string> References { get; set; }
 
+		/// <summary>
+		/// Creates new instance of CSharpScript, setting some
+		/// default references.
+		/// </summary>
 		public CSharpScript()
 		{
 			this.References = new HashSet<string>();
@@ -28,6 +42,13 @@ namespace Swebs.RequestHandlers.CSharp
 			this.References.Add("Swebs.dll");
 		}
 
+		/// <summary>
+		/// Handles request by looking up, compiling, and caching the script
+		/// and using it to render content to send back to the client.
+		/// </summary>
+		/// <param name="args"></param>
+		/// <param name="requestPath"></param>
+		/// <param name="localPath"></param>
 		public void Handle(HttpRequestEventArgs args, string requestPath, string localPath)
 		{
 			var request = args.Request;
@@ -52,6 +73,12 @@ namespace Swebs.RequestHandlers.CSharp
 			}
 		}
 
+		/// <summary>
+		/// Compiles and caches script, returning the cached version if it
+		/// exists.
+		/// </summary>
+		/// <param name="filePath"></param>
+		/// <returns></returns>
 		private IScript GetCachedScript(string filePath)
 		{
 			filePath = filePath.Replace('/', Path.DirectorySeparatorChar);
@@ -72,6 +99,13 @@ namespace Swebs.RequestHandlers.CSharp
 			return script;
 		}
 
+		/// <summary>
+		/// Compiles script and returns it. Returns ErrorScript if
+		/// compilation fails, and null if file doesn't contain any class
+		/// that implements IScript.
+		/// </summary>
+		/// <param name="filePath"></param>
+		/// <returns></returns>
 		private IScript GetScript(string filePath)
 		{
 			var entryAssembly = Assembly.GetEntryAssembly();

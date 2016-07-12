@@ -9,18 +9,45 @@ using System.Threading.Tasks;
 
 namespace Swebs
 {
+	/// <summary>
+	/// The web server's configuration.
+	/// </summary>
 	public class Configuration
 	{
+		/// <summary>
+		/// The host to bind the server to.
+		/// </summary>
 		public IPAddress Host { get; set; }
+
+		/// <summary>
+		/// The port to bind the server to.
+		/// </summary>
 		public int Port { get; set; }
 
+		/// <summary>
+		/// The server's root path.
+		/// </summary>
 		public string RootPath { get; set; }
+
+		/// <summary>
+		/// Whether to allow listing of directory contents.
+		/// </summary>
 		public bool AllowDirectoryListing { get; set; }
 
+		/// <summary>
+		/// List of valid index file names.
+		/// </summary>
 		public List<string> IndexNames { get; set; }
 
+		/// <summary>
+		/// List of special handlers for specific extensions.
+		/// </summary>
 		public Dictionary<string, IRequestHandler> FileTypeHandlers { get; set; }
 
+		/// <summary>
+		/// Creates new Configuration instance, while setting default values
+		/// for all options.
+		/// </summary>
 		public Configuration()
 		{
 			this.Host = IPAddress.Any;
