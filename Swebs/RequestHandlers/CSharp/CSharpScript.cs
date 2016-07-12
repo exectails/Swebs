@@ -83,16 +83,21 @@ namespace Swebs.RequestHandlers.CSharp
 		{
 			filePath = filePath.Replace('/', Path.DirectorySeparatorChar);
 
+			// Try to load script from cache.
 			IScript script;
 			lock (_cache)
 				_cache.TryGetValue(filePath, out script);
 
+			// If script wasn't found in cache, try to compile it.
 			if (script == null)
-				script = GetScript(filePath);
+			{
+				// If compilation failed, return whatever was returned
+				// (either null or ErrorScript).
+				if (!this.GetScript(filePath, out script))
+					return script;
+			}
 
-			if (script == null)
-				return null;
-
+			// If a script was successfully found, cache it.
 			lock (_cache)
 				_cache[filePath] = script;
 
@@ -100,14 +105,16 @@ namespace Swebs.RequestHandlers.CSharp
 		}
 
 		/// <summary>
-		/// Compiles script and returns it. Returns ErrorScript if
-		/// compilation fails, and null if file doesn't contain any class
-		/// that implements IScript.
+		/// Compiles script and returns it via out parameter. The boolean
+		/// return value determines whether compilation was successful,
+		/// with no errors and a resulting IScript.
 		/// </summary>
 		/// <param name="filePath"></param>
 		/// <returns></returns>
-		private IScript GetScript(string filePath)
+		private bool GetScript(string filePath, out IScript script)
 		{
+			script = null;
+
 			var entryAssembly = Assembly.GetEntryAssembly();
 			var asmPath = entryAssembly.Location;
 			var asmDir = Path.GetDirectoryName(asmPath);
@@ -126,16 +133,19 @@ namespace Swebs.RequestHandlers.CSharp
 			var provider = CodeDomProvider.CreateProvider("CSharp");
 			var results = provider.CompileAssemblyFromFile(parameters, filePath);
 			if (results.Errors.Count != 0)
-				return new ErrorScript(results.Errors);
+			{
+				script = new ErrorScript(results.Errors);
+				return false;
+			}
 
 			var types = results.CompiledAssembly.GetTypes();
 			var type = types.FirstOrDefault(a => a.GetInterfaces().Contains(typeof(IScript)) && !a.IsAbstract);
 			if (type == null)
-				return null;
+				return false;
 
-			var script = Activator.CreateInstance(type) as IScript;
+			script = Activator.CreateInstance(type) as IScript;
 
-			return script;
+			return (script != null);
 		}
 	}
 }
