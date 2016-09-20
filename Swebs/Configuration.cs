@@ -63,9 +63,10 @@ namespace Swebs
 			this.Port = 80;
 
 			this.SourcePaths = new List<string>();
-			this.AllowDirectoryListing = true;
+			this.AllowDirectoryListing = false;
 
 			this.IndexNames = new List<string>();
+			this.IndexNames.Add("index.cs");
 			this.IndexNames.Add("index.htm");
 			this.IndexNames.Add("index.html");
 
