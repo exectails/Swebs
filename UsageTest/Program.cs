@@ -22,7 +22,7 @@ namespace UsageTest
 
 			var server = new Server(webConf);
 			server.HttpServer.RequestReceived += (s, e) => Console.WriteLine("[{0}] - {1}", e.Request.HttpMethod, e.Request.Path);
-			server.HttpServer.UnhandledException += (s, e) => Console.WriteLine("[{Error}] {1}", e.Exception);
+			server.HttpServer.UnhandledException += (s, e) => Console.WriteLine("[Error] {0}", e.Exception);
 			server.Start();
 
 			//Process.Start("http://127.0.0.1:8181");
