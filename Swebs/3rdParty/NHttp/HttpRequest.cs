@@ -382,5 +382,14 @@ namespace NHttp
 
             return result;
         }
+
+		public string Parameter(string name, string def = null)
+		{
+			var result = this.Params.Get(name);
+			if (result == null)
+				result = def;
+
+			return result;
+		}
     }
 }

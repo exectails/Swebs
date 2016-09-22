@@ -27,5 +27,18 @@ namespace NHttp
         public string FileName { get; private set; }
 
         public Stream InputStream { get; private set; }
+
+		public bool MoveTo(string filePath)
+		{
+			var folder = Path.GetDirectoryName(filePath);
+			if (!Directory.Exists(folder))
+				Directory.CreateDirectory(folder);
+
+			using (var inFile = this.InputStream)
+			using (var outFile = new FileStream(filePath, FileMode.Create, FileAccess.Write))
+				inFile.CopyTo(outFile);
+
+			return true;
+		}
     }
 }
