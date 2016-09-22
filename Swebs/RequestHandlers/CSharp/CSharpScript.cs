@@ -39,7 +39,6 @@ namespace Swebs.RequestHandlers.CSharp
 			this.References.Add("Microsoft.CSharp.dll");
 			this.References.Add("System.Xml.dll");
 			this.References.Add("System.Xml.Linq.dll");
-			this.References.Add("Swebs.dll");
 		}
 
 		/// <summary>
@@ -130,13 +129,20 @@ namespace Swebs.RequestHandlers.CSharp
 			script = null;
 
 			var entryAssembly = Assembly.GetEntryAssembly();
-			var asmPath = entryAssembly.Location;
-			var asmDir = Path.GetDirectoryName(asmPath);
+			var loadedAssemblies = AppDomain.CurrentDomain.GetAssemblies();
+			var referencedAssemblies = entryAssembly.GetReferencedAssemblies().Select(a => loadedAssemblies.SingleOrDefault(b => b.FullName == a.FullName));
+			var references = referencedAssemblies.Where(a => !a.IsDynamic).Select(a => a.Location).ToList();
+
+			foreach (var defaultReference in this.References)
+			{
+				if (!references.Any(a => a.Contains(defaultReference)))
+					references.Add(defaultReference);
+			}
 
 			var parameters = new CompilerParameters();
-			foreach (var reference in this.References)
+			foreach (var reference in references)
 				parameters.ReferencedAssemblies.Add(reference);
-			parameters.ReferencedAssemblies.Add(asmPath);
+			parameters.ReferencedAssemblies.Add(entryAssembly.Location);
 			parameters.GenerateExecutable = false;
 			parameters.GenerateInMemory = true;
 			parameters.TreatWarningsAsErrors = false;
