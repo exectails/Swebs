@@ -6,11 +6,14 @@ namespace Swebs
 {
 	public class HttpContext
 	{
-		internal HttpContext(HttpClient client)
+		internal HttpContext(HttpServer server, HttpClient client)
 		{
+			Server = server;
 			Request = new HttpRequest(client);
 			Response = new HttpResponse(this);
 		}
+
+		public HttpServer Server { get; private set; }
 
 		public HttpRequest Request { get; private set; }
 

@@ -482,7 +482,7 @@ namespace Swebs
 
 		public void ExecuteRequest()
 		{
-			_context = new HttpContext(this);
+			_context = new HttpContext(Server, this);
 
 			Log.Debug(String.Format("Accepted request '{0}'", _context.Request.RawUrl));
 
@@ -649,7 +649,7 @@ namespace Swebs
 			try
 			{
 				if (_context == null)
-					_context = new HttpContext(this);
+					_context = new HttpContext(Server, this);
 
 				_context.Response.Status = "500 Internal Server Error";
 
