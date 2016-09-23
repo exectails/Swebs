@@ -7,11 +7,8 @@ using System.Threading.Tasks;
 
 namespace Swebs.RequestHandlers.CSharp
 {
-	/// <summary>
-	/// Interface for C# scripts in the web folder to inherit from.
-	/// </summary>
-	public interface IScript
+	public abstract class Controller : IRequestHandler
 	{
-		string Render(HttpRequestEventArgs args);
+		public abstract void Handle(HttpRequestEventArgs args, string requestPath, string localPath);
 	}
 }

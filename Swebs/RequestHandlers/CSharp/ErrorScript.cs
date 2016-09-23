@@ -11,7 +11,7 @@ namespace Swebs.RequestHandlers.CSharp
 	/// <summary>
 	/// Script used when a C# script fails to compile.
 	/// </summary>
-	public class ErrorScript : IScript
+	public class ErrorScript : Controller
 	{
 		private CompilerErrorCollection _errors;
 
@@ -29,7 +29,7 @@ namespace Swebs.RequestHandlers.CSharp
 		/// </summary>
 		/// <param name="args"></param>
 		/// <returns></returns>
-		public string Render(HttpRequestEventArgs args)
+		public override void Handle(HttpRequestEventArgs args, string requestPath, string localPath)
 		{
 			var sb = new StringBuilder();
 
@@ -47,7 +47,7 @@ namespace Swebs.RequestHandlers.CSharp
 			sb.AppendLine("</body>");
 			sb.AppendLine("</html>");
 
-			return sb.ToString();
+			args.Response.Send(sb.ToString());
 		}
 	}
 }

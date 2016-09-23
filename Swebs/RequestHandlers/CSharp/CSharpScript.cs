@@ -19,7 +19,7 @@ namespace Swebs.RequestHandlers.CSharp
 	/// </remarks>
 	public class CSharpScript : IRequestHandler
 	{
-		private Dictionary<string, IScript> _cache = new Dictionary<string, IScript>();
+		private Dictionary<string, IRequestHandler> _cache = new Dictionary<string, IRequestHandler>();
 
 		/// <summary>
 		/// References passed to the compiler.
@@ -58,10 +58,7 @@ namespace Swebs.RequestHandlers.CSharp
 
 			// Get contents
 			var script = this.GetCachedScript(localPath);
-			string contents = "";
-			if (script != null)
-				contents = script.Render(args);
-			else
+			if (script == null)
 			{
 				var sb = new StringBuilder();
 
@@ -75,15 +72,12 @@ namespace Swebs.RequestHandlers.CSharp
 				sb.AppendLine("</body>");
 				sb.AppendLine("</html>");
 
-				contents = sb.ToString();
+				response.Send(sb.ToString());
+
+				return;
 			}
 
-			// Send
-			using (var output = response.OutputStream)
-			{
-				var bytes = Encoding.UTF8.GetBytes(contents);
-				output.Write(bytes, 0, bytes.Length);
-			}
+			script.Handle(args, requestPath, localPath);
 		}
 
 		/// <summary>
@@ -92,12 +86,12 @@ namespace Swebs.RequestHandlers.CSharp
 		/// </summary>
 		/// <param name="filePath"></param>
 		/// <returns></returns>
-		private IScript GetCachedScript(string filePath)
+		private IRequestHandler GetCachedScript(string filePath)
 		{
 			filePath = filePath.Replace('/', Path.DirectorySeparatorChar);
 
 			// Try to load script from cache.
-			IScript script;
+			IRequestHandler script;
 			lock (_cache)
 				_cache.TryGetValue(filePath, out script);
 
@@ -124,7 +118,7 @@ namespace Swebs.RequestHandlers.CSharp
 		/// </summary>
 		/// <param name="filePath"></param>
 		/// <returns></returns>
-		private bool GetScript(string filePath, out IScript script)
+		private bool GetScript(string filePath, out IRequestHandler script)
 		{
 			script = null;
 
@@ -159,11 +153,11 @@ namespace Swebs.RequestHandlers.CSharp
 			}
 
 			var types = results.CompiledAssembly.GetTypes();
-			var type = types.FirstOrDefault(a => a.GetInterfaces().Contains(typeof(IScript)) && !a.IsAbstract);
+			var type = types.FirstOrDefault(a => a.GetInterfaces().Contains(typeof(IRequestHandler)) && !a.IsAbstract);
 			if (type == null)
 				return false;
 
-			script = Activator.CreateInstance(type) as IScript;
+			script = Activator.CreateInstance(type) as IRequestHandler;
 
 			return (script != null);
 		}
