@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 
-namespace NHttp
+namespace Swebs
 {
 	internal class HttpTimeoutManager : IDisposable
 	{

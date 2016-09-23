@@ -7,7 +7,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 
-namespace NHttp
+namespace Swebs
 {
 	public class HttpRequest
 	{
