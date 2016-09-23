@@ -147,5 +147,17 @@ namespace NHttp
             StatusCode = permanent ? 301 : 302;
             StatusDescription = "Moved";
         }
+
+		public void Send(string content)
+		{
+			if (!this.OutputStream.CanWrite)
+				throw new InvalidOperationException("Unable to write to output stream.");
+		
+			using (var output = this.OutputStream)
+			{
+				var bytes = Encoding.UTF8.GetBytes(content);
+				output.Write(bytes, 0, bytes.Length);
+			}
+		}
     }
 }
