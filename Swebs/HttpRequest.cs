@@ -363,7 +363,7 @@ namespace Swebs
 			ServerVariables["REMOTE_PORT"] = null;
 			ServerVariables["REQUEST_METHOD"] = RequestType;
 			ServerVariables["SCRIPT_NAME"] = Path;
-			ServerVariables["SERVER_NAME"] = client.Server.ServerUtility.MachineName;
+			ServerVariables["SERVER_NAME"] = Environment.MachineName;
 			ServerVariables["SERVER_PORT"] = client.Server.EndPoint.Port.ToString(CultureInfo.InvariantCulture);
 			ServerVariables["SERVER_PROTOCOL"] = client.Protocol;
 			ServerVariables["URL"] = Path;

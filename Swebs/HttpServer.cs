@@ -109,8 +109,6 @@ namespace Swebs
 
 		public TimeSpan ShutdownTimeout { get; set; }
 
-		internal HttpServerUtility ServerUtility { get; private set; }
-
 		internal HttpTimeoutManager TimeoutManager { get; private set; }
 
 		public HttpServer(Configuration conf)
@@ -155,8 +153,6 @@ namespace Swebs
 				EndPoint = (IPEndPoint)listener.LocalEndpoint;
 
 				_listener = listener;
-
-				ServerUtility = new HttpServerUtility();
 
 				Log.Info(String.Format("HTTP server running at {0}", EndPoint));
 			}
@@ -410,13 +406,13 @@ namespace Swebs
 		private void OnRequestReceived(object sender, HttpRequestEventArgs args)
 		{
 			var requestPath = args.Request.Path.NormalizePath();
-			requestPath = args.Server.UrlDecode(requestPath);
+			requestPath = HttpUtil.UriDecode(requestPath);
 			requestPath = requestPath.Trim('/');
 
 			foreach (var rootPath in this.SourcePaths)
 			{
 				var localPath = Path.Combine(rootPath, requestPath);
-				localPath = args.Server.UrlDecode(localPath);
+				localPath = HttpUtil.UriDecode(localPath);
 				localPath = localPath.NormalizePath();
 
 				// Check scope
