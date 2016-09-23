@@ -3,385 +3,403 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text;
 
 namespace NHttp
 {
-    public class HttpRequest
-    {
-        private static readonly ILog Log = LogManager.GetLogger(typeof(HttpRequest));
+	public class HttpRequest
+	{
+		private static readonly ILog Log = LogManager.GetLogger(typeof(HttpRequest));
 
-        private static readonly string[] EmptyStringArray = new string[0];
+		private static readonly string[] EmptyStringArray = new string[0];
 
-        public string[] AcceptTypes { get; private set; }
+		public string[] AcceptTypes { get; private set; }
 
-        public Encoding ContentEncoding { get; private set; }
+		public Encoding ContentEncoding { get; private set; }
 
-        public int ContentLength { get; private set; }
+		public int ContentLength { get; private set; }
 
-        public string ContentType { get; private set; }
+		public string ContentType { get; private set; }
 
-        public HttpCookieCollection Cookies { get; private set; }
+		public HttpCookieCollection Cookies { get; private set; }
 
-        public HttpFileCollection Files { get; private set; }
+		public HttpFileCollection Files { get; private set; }
 
-        public NameValueCollection Form { get; private set; }
+		public NameValueCollection Form { get; private set; }
 
-        public NameValueCollection Headers { get; private set; }
+		public NameValueCollection Headers { get; private set; }
 
-        public string HttpMethod { get; private set; }
+		public string HttpMethod { get; private set; }
 
-        public Stream InputStream { get; private set; }
+		public Stream InputStream { get; private set; }
 
-        public NameValueCollection Params { get; private set; }
+		public NameValueCollection Params { get; private set; }
 
-        public string Path { get; private set; }
+		public string Path { get; private set; }
 
-        public NameValueCollection QueryString { get; private set; }
+		public NameValueCollection QueryString { get; private set; }
 
-        public string RawUrl { get; private set; }
+		public string RawUrl { get; private set; }
 
-        public string RequestType { get; private set; }
+		public string RequestType { get; private set; }
 
-        public NameValueCollection ServerVariables { get; private set; }
+		public NameValueCollection ServerVariables { get; private set; }
 
-        public Uri Url { get; private set; }
+		public Uri Url { get; private set; }
 
-        public Uri UrlReferer { get; private set; }
+		public Uri UrlReferer { get; private set; }
 
-        public string UserAgent { get; private set; }
+		public string UserAgent { get; private set; }
 
-        public string UserHostAddress { get; private set; }
+		public string UserHostAddress { get; private set; }
 
-        public string UserHostName { get; private set; }
+		public string UserHostName { get; private set; }
 
-        public string[] UserLanguages { get; private set; }
+		public string[] UserLanguages { get; private set; }
 
-        internal HttpRequest(HttpClient client)
-        {
-            ParseHeaders(client);
+		public IPEndPoint LocalEndPoint { get; private set; }
 
-            Form = client.PostParameters;
+		public IPEndPoint RemoteEndPoint { get; private set; }
 
-            ParseMultiPartItems(client);
+		/// <summary>
+		/// Host address the client used in the request.
+		/// </summary>
+		public string HttpHost { get { return this.LocalEndPoint.Address.ToString(); } }
 
-            HttpMethod = RequestType = client.Method;
+		/// <summary>
+		/// Port the client used in the request.
+		/// </summary>
+		public int HttpPort { get { return this.LocalEndPoint.Port; } }
 
-            ParsePath(client);
+		internal HttpRequest(HttpClient client)
+		{
+			ParseHeaders(client);
 
-            ParseRemoteEndPoint(client);
+			Form = client.PostParameters;
 
-            BuildServerVariables(client);
+			ParseMultiPartItems(client);
 
-            BuildParams();
+			HttpMethod = RequestType = client.Method;
 
-            InputStream = client.InputStream;
+			ParsePath(client);
 
-            if (InputStream != null)
-                InputStream.Position = 0;
-        }
+			ParseRemoteEndPoint(client);
 
-        private void ParseHeaders(HttpClient client)
-        {
-            Headers = CreateCollection(client.Headers);
+			BuildServerVariables(client);
 
-            string header;
+			BuildParams();
 
-            // Parse Accept.
+			InputStream = client.InputStream;
 
-            if (client.Headers.TryGetValue("Accept", out header))
-            {
-                string[] parts = header.Split(',');
+			if (InputStream != null)
+				InputStream.Position = 0;
+		}
 
-                HttpUtil.TrimAll(parts);
+		private void ParseHeaders(HttpClient client)
+		{
+			Headers = CreateCollection(client.Headers);
 
-                AcceptTypes = parts;
-            }
-            else
-            {
-                AcceptTypes = EmptyStringArray;
-            }
+			string header;
 
-            // Parse Content-Type.
+			// Parse Accept.
 
-            if (client.Headers.TryGetValue("Content-Type", out header))
-            {
-                string[] parts = header.Split(new[] { ';' }, 2);
+			if (client.Headers.TryGetValue("Accept", out header))
+			{
+				string[] parts = header.Split(',');
 
-                ContentType = parts[0].Trim();
+				HttpUtil.TrimAll(parts);
 
-                if (parts.Length == 2)
-                {
-                    string[] encoding = parts[1].Trim().Split(new[] { '=' }, 2);
+				AcceptTypes = parts;
+			}
+			else
+			{
+				AcceptTypes = EmptyStringArray;
+			}
 
-                    if (encoding.Length == 2 && String.Equals(encoding[0], "charset", StringComparison.OrdinalIgnoreCase))
-                    {
-                        ContentEncoding = Encoding.GetEncoding(encoding[1]);
-                    }
-                }
-            }
+			// Parse Content-Type.
 
-            // Parse Content-Length.
+			if (client.Headers.TryGetValue("Content-Type", out header))
+			{
+				string[] parts = header.Split(new[] { ';' }, 2);
 
-            if (client.Headers.TryGetValue("Content-Length", out header))
-            {
-                int contentLength;
+				ContentType = parts[0].Trim();
 
-                if (int.TryParse(header, out contentLength))
-                    ContentLength = contentLength;
-            }
+				if (parts.Length == 2)
+				{
+					string[] encoding = parts[1].Trim().Split(new[] { '=' }, 2);
 
-            // Parse Referer.
+					if (encoding.Length == 2 && String.Equals(encoding[0], "charset", StringComparison.OrdinalIgnoreCase))
+					{
+						ContentEncoding = Encoding.GetEncoding(encoding[1]);
+					}
+				}
+			}
 
-            if (client.Headers.TryGetValue("Referer", out header))
-                UrlReferer = new Uri(header);
+			// Parse Content-Length.
 
-            // Parse User-Agent.
+			if (client.Headers.TryGetValue("Content-Length", out header))
+			{
+				int contentLength;
 
-            if (client.Headers.TryGetValue("User-Agent", out header))
-                UserAgent = header;
+				if (int.TryParse(header, out contentLength))
+					ContentLength = contentLength;
+			}
+
+			// Parse Referer.
 
-            // Parse Accept-Language.
+			if (client.Headers.TryGetValue("Referer", out header))
+				UrlReferer = new Uri(header);
 
-            if (client.Headers.TryGetValue("Accept-Language", out header))
-            {
-                string[] parts = header.Split(',');
+			// Parse User-Agent.
 
-                HttpUtil.TrimAll(parts);
+			if (client.Headers.TryGetValue("User-Agent", out header))
+				UserAgent = header;
 
-                UserLanguages = parts;
-            }
-            else
-            {
-                UserLanguages = EmptyStringArray;
-            }
+			// Parse Accept-Language.
 
-            // Parse Cookie.
+			if (client.Headers.TryGetValue("Accept-Language", out header))
+			{
+				string[] parts = header.Split(',');
 
-            Cookies = new HttpCookieCollection();
+				HttpUtil.TrimAll(parts);
 
-            if (client.Headers.TryGetValue("Cookie", out header))
-            {
-                string[] parts = header.Split(';');
+				UserLanguages = parts;
+			}
+			else
+			{
+				UserLanguages = EmptyStringArray;
+			}
 
-                foreach (string part in parts)
-                {
-                    string[] partParts = part.Split(new[] { '=' }, 2);
+			// Parse Cookie.
 
-                    string name = partParts[0].Trim();
-                    string value = partParts.Length == 1 ? null : partParts[1];
+			Cookies = new HttpCookieCollection();
 
-                    Cookies.AddCookie(new HttpCookie(name, value), true);
-                }
-            }
-        }
+			if (client.Headers.TryGetValue("Cookie", out header))
+			{
+				string[] parts = header.Split(';');
 
-        private void ParseMultiPartItems(HttpClient client)
-        {
-            Files = new HttpFileCollection();
+				foreach (string part in parts)
+				{
+					string[] partParts = part.Split(new[] { '=' }, 2);
 
-            if (client.MultiPartItems == null)
-                return;
+					string name = partParts[0].Trim();
+					string value = partParts.Length == 1 ? null : partParts[1];
 
-            foreach (var item in client.MultiPartItems)
-            {
-                string contentType = null;
-                string name = null;
-                string fileName = null;
+					Cookies.AddCookie(new HttpCookie(name, value), true);
+				}
+			}
+		}
 
-                string header;
+		private void ParseMultiPartItems(HttpClient client)
+		{
+			Files = new HttpFileCollection();
 
-                if (item.Headers.TryGetValue("Content-Disposition", out header))
-                {
-                    string[] parts = header.Split(';');
+			if (client.MultiPartItems == null)
+				return;
 
-                    for (int i = 0; i < parts.Length; i++)
-                    {
-                        string part = parts[i].Trim();
+			foreach (var item in client.MultiPartItems)
+			{
+				string contentType = null;
+				string name = null;
+				string fileName = null;
 
-                        if (part.StartsWith("name="))
-                            name = ParseContentDispositionItem(part.Substring(5));
-                        else if (part.StartsWith("filename="))
-                            fileName = ParseContentDispositionItem(part.Substring(9));
-                    }
-                }
+				string header;
 
-                if (item.Headers.TryGetValue("Content-Type", out header))
-                    contentType = header;
+				if (item.Headers.TryGetValue("Content-Disposition", out header))
+				{
+					string[] parts = header.Split(';');
 
-                if (name == null)
-                {
-                    Log.Info("Received multipart item without name");
-                    continue;
-                }
+					for (int i = 0; i < parts.Length; i++)
+					{
+						string part = parts[i].Trim();
 
-                if (item.Value != null)
-                {
-                    Form[name] = item.Value;
-                }
-                else
-                {
-                    Files.AddFile(name, new HttpPostedFile((int)item.Stream.Length, contentType, fileName, item.Stream));
-                }
-            }
-        }
+						if (part.StartsWith("name="))
+							name = ParseContentDispositionItem(part.Substring(5));
+						else if (part.StartsWith("filename="))
+							fileName = ParseContentDispositionItem(part.Substring(9));
+					}
+				}
 
-        private string ParseContentDispositionItem(string value)
-        {
-            if (value.Length == 0)
-                return value;
+				if (item.Headers.TryGetValue("Content-Type", out header))
+					contentType = header;
 
-            if (value.Length >= 2 && value[0] == '"' && value[value.Length - 1] == '"')
-                value = value.Substring(1, value.Length - 2);
+				if (name == null)
+				{
+					Log.Info("Received multipart item without name");
+					continue;
+				}
 
-            return HttpUtil.UriDecode(value);
-        }
+				if (item.Value != null)
+				{
+					Form[name] = item.Value;
+				}
+				else
+				{
+					Files.AddFile(name, new HttpPostedFile((int)item.Stream.Length, contentType, fileName, item.Stream));
+				}
+			}
+		}
 
-        private void ParsePath(HttpClient client)
-        {
-            RawUrl = client.Request;
+		private string ParseContentDispositionItem(string value)
+		{
+			if (value.Length == 0)
+				return value;
 
-            string[] parts = client.Request.Split(new[] { '?' }, 2);
+			if (value.Length >= 2 && value[0] == '"' && value[value.Length - 1] == '"')
+				value = value.Substring(1, value.Length - 2);
 
-            Path = parts[0];
+			return HttpUtil.UriDecode(value);
+		}
 
-            QueryString = new NameValueCollection();
-            if (parts.Length == 2)
-                 HttpUtil.UrlDecodeTo(parts[1], QueryString);
+		private void ParsePath(HttpClient client)
+		{
+			RawUrl = client.Request;
 
-            string host;
-            string port;
-            string hostHeader;
+			string[] parts = client.Request.Split(new[] { '?' }, 2);
 
-            if (client.Headers.TryGetValue("Host", out hostHeader))
-            {
-                parts = hostHeader.Split(new[] { ':' }, 2);
+			Path = parts[0];
 
-                host = parts[0];
+			QueryString = new NameValueCollection();
+			if (parts.Length == 2)
+				HttpUtil.UrlDecodeTo(parts[1], QueryString);
 
-                if (parts.Length == 2)
-                    port = parts[1];
-                else
-                    port = null;
-            }
-            else
-            {
-                var endPoint = client.Server.EndPoint;
+			string host;
+			string port;
+			string hostHeader;
 
-                host = endPoint.Address.ToString();
-                
-                if (endPoint.Port == 80)
-                    port = null;
-                else
-                    port = endPoint.Port.ToString(CultureInfo.InvariantCulture);
-            }
+			if (client.Headers.TryGetValue("Host", out hostHeader))
+			{
+				parts = hostHeader.Split(new[] { ':' }, 2);
 
-            var sb = new StringBuilder();
-
-            sb.Append("http://");
-            sb.Append(host);
-
-            if (port != null)
-            {
-                sb.Append(':');
-                sb.Append(port);
-            }
-
-            sb.Append(client.Request);
-
-            Url = new Uri(sb.ToString());
-        }
-
-        private void ParseRemoteEndPoint(HttpClient client)
-        {
-            var endPoint = (IPEndPoint)client.TcpClient.Client.RemoteEndPoint;
-
-            UserHostName = UserHostAddress = endPoint.Address.ToString();
-        }
-
-        private void BuildServerVariables(HttpClient client)
-        {
-            ServerVariables = new NameValueCollection();
-
-            // Add all headers.
-
-            var allHttp = new StringBuilder();
-            var allRaw = new StringBuilder();
-
-            foreach (var item in client.Headers)
-            {
-                ServerVariables[item.Key] = item.Value;
-
-                string httpKey = "HTTP_" + (item.Key.Replace('-', '_')).ToUpperInvariant();
-
-                ServerVariables[httpKey] = item.Value;
-
-                allHttp.Append(httpKey);
-                allHttp.Append('=');
-                allHttp.Append(item.Value);
-                allHttp.Append("\r\n");
-
-                allRaw.Append(item.Key);
-                allRaw.Append('=');
-                allRaw.Append(item.Value);
-                allRaw.Append("\r\n");
-            }
-
-            ServerVariables["ALL_HTTP"] = allHttp.ToString();
-            ServerVariables["ALL_RAW"] = allRaw.ToString();
-
-            ServerVariables["CONTENT_LENGTH"] = ContentLength.ToString(CultureInfo.InvariantCulture);
-            ServerVariables["CONTENT_TYPE"] = ContentType;
-
-            ServerVariables["LOCAL_ADDR"] = client.Server.EndPoint.Address.ToString();
-            ServerVariables["PATH_INFO"] = Path;
-
-            string[] parts = client.Request.Split(new[] { '?' }, 2);
-
-            ServerVariables["QUERY_STRING"] = parts.Length == 2 ? parts[1] : "";
-            ServerVariables["REMOTE_ADDR"] = UserHostAddress;
-            ServerVariables["REMOTE_HOST"] = UserHostName;
-            ServerVariables["REMOTE_PORT"] = null;
-            ServerVariables["REQUEST_METHOD"] = RequestType;
-            ServerVariables["SCRIPT_NAME"] = Path;
-            ServerVariables["SERVER_NAME"] = client.Server.ServerUtility.MachineName;
-            ServerVariables["SERVER_PORT"] = client.Server.EndPoint.Port.ToString(CultureInfo.InvariantCulture);
-            ServerVariables["SERVER_PROTOCOL"] = client.Protocol;
-            ServerVariables["URL"] = Path;
-        }
-
-        private void BuildParams()
-        {
-            Params = new NameValueCollection();
-
-            Merge(Params, QueryString);
-            Merge(Params, Form);
-            Merge(Params, ServerVariables);
-        }
-
-        private void Merge(NameValueCollection target, NameValueCollection source)
-        {
-            foreach (string key in source.AllKeys)
-            {
-                target[key] = source[key];
-            }
-        }
-
-        private NameValueCollection CreateCollection(Dictionary<string, string> headers)
-        {
-            var result = new NameValueCollection();
-
-            if (headers != null)
-            {
-                foreach (var item in headers)
-                {
-                    result[item.Key] = item.Value;
-                }
-            }
-
-            return result;
-        }
+				host = parts[0];
+
+				if (parts.Length == 2)
+					port = parts[1];
+				else
+					port = null;
+			}
+			else
+			{
+				var endPoint = client.Server.EndPoint;
+
+				host = endPoint.Address.ToString();
+
+				if (endPoint.Port == 80)
+					port = null;
+				else
+					port = endPoint.Port.ToString(CultureInfo.InvariantCulture);
+			}
+
+			var sb = new StringBuilder();
+
+			sb.Append("http://");
+			sb.Append(host);
+
+			if (port != null)
+			{
+				sb.Append(':');
+				sb.Append(port);
+			}
+
+			sb.Append(client.Request);
+
+			Url = new Uri(sb.ToString());
+		}
+
+		private void ParseRemoteEndPoint(HttpClient client)
+		{
+			var endPoint = (IPEndPoint)client.TcpClient.Client.RemoteEndPoint;
+
+			UserHostName = UserHostAddress = endPoint.Address.ToString();
+
+			RemoteEndPoint = (IPEndPoint)client.TcpClient.Client.RemoteEndPoint;
+			LocalEndPoint = (IPEndPoint)client.TcpClient.Client.LocalEndPoint;
+		}
+
+		private void BuildServerVariables(HttpClient client)
+		{
+			ServerVariables = new NameValueCollection();
+
+			// Add all headers.
+
+			var allHttp = new StringBuilder();
+			var allRaw = new StringBuilder();
+
+			foreach (var item in client.Headers)
+			{
+				ServerVariables[item.Key] = item.Value;
+
+				string httpKey = "HTTP_" + (item.Key.Replace('-', '_')).ToUpperInvariant();
+
+				ServerVariables[httpKey] = item.Value;
+
+				allHttp.Append(httpKey);
+				allHttp.Append('=');
+				allHttp.Append(item.Value);
+				allHttp.Append("\r\n");
+
+				allRaw.Append(item.Key);
+				allRaw.Append('=');
+				allRaw.Append(item.Value);
+				allRaw.Append("\r\n");
+			}
+
+			ServerVariables["ALL_HTTP"] = allHttp.ToString();
+			ServerVariables["ALL_RAW"] = allRaw.ToString();
+
+			ServerVariables["CONTENT_LENGTH"] = ContentLength.ToString(CultureInfo.InvariantCulture);
+			ServerVariables["CONTENT_TYPE"] = ContentType;
+
+			ServerVariables["LOCAL_ADDR"] = client.Server.EndPoint.Address.ToString();
+			ServerVariables["PATH_INFO"] = Path;
+
+			string[] parts = client.Request.Split(new[] { '?' }, 2);
+
+			ServerVariables["QUERY_STRING"] = parts.Length == 2 ? parts[1] : "";
+			ServerVariables["REMOTE_ADDR"] = UserHostAddress;
+			ServerVariables["REMOTE_HOST"] = UserHostName;
+			ServerVariables["REMOTE_PORT"] = null;
+			ServerVariables["REQUEST_METHOD"] = RequestType;
+			ServerVariables["SCRIPT_NAME"] = Path;
+			ServerVariables["SERVER_NAME"] = client.Server.ServerUtility.MachineName;
+			ServerVariables["SERVER_PORT"] = client.Server.EndPoint.Port.ToString(CultureInfo.InvariantCulture);
+			ServerVariables["SERVER_PROTOCOL"] = client.Protocol;
+			ServerVariables["URL"] = Path;
+		}
+
+		private void BuildParams()
+		{
+			Params = new NameValueCollection();
+
+			Merge(Params, QueryString);
+			Merge(Params, Form);
+			Merge(Params, ServerVariables);
+		}
+
+		private void Merge(NameValueCollection target, NameValueCollection source)
+		{
+			foreach (string key in source.AllKeys)
+			{
+				target[key] = source[key];
+			}
+		}
+
+		private NameValueCollection CreateCollection(Dictionary<string, string> headers)
+		{
+			var result = new NameValueCollection();
+
+			if (headers != null)
+			{
+				foreach (var item in headers)
+				{
+					result[item.Key] = item.Value;
+				}
+			}
+
+			return result;
+		}
 
 		public string Parameter(string name, string def = null)
 		{
@@ -391,5 +409,21 @@ namespace NHttp
 
 			return result;
 		}
-    }
+
+		public HttpPostedFile File(string name)
+		{
+			if (!this.Files.AllKeys.Contains(name))
+				return null;
+
+			return this.Files.Get(name);
+		}
+
+		public HttpPostedFile File(int index)
+		{
+			if (index < 0 || index >= this.Files.Count - 1)
+				return null;
+
+			return this.Files.Get(index);
+		}
+	}
 }
