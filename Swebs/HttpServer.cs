@@ -447,6 +447,37 @@ namespace Swebs
 		}
 
 		/// <summary>
+		/// Returns path to the first local file or folder found in the
+		/// source paths. Returns null if none exist.
+		/// </summary>
+		/// <param name="path"></param>
+		/// <returns></returns>
+		public string GetLocalPath(string path)
+		{
+			var requestPath = path.NormalizePath();
+			requestPath = HttpUtil.UriDecode(requestPath);
+			requestPath = requestPath.Trim('/');
+
+			foreach (var rootPath in this.SourcePaths)
+			{
+				var localPath = Path.Combine(rootPath, requestPath);
+				localPath = HttpUtil.UriDecode(localPath);
+				localPath = localPath.NormalizePath();
+
+				// Check scope
+				var fullRequestPath = Path.GetFullPath(localPath).NormalizePath().TrimEnd('/');
+				var fullRootPath = Path.GetFullPath(rootPath).NormalizePath().TrimEnd('/');
+				if (!fullRequestPath.StartsWith(fullRootPath))
+					continue;
+
+				if (File.Exists(localPath) || Directory.Exists(localPath))
+					return localPath;
+			}
+
+			return null;
+		}
+
+		/// <summary>
 		/// Checks given path is a directory that contains an index file.
 		/// If so, the path is set to that index file's path and true
 		/// is returned.
