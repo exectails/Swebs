@@ -5,28 +5,33 @@ using System.Text;
 
 namespace NHttp
 {
-    public class HttpPostedFile
-    {
-        public HttpPostedFile(int contentLength, string contentType, string fileName, Stream inputStream)
-        {
-            if (fileName == null)
-                throw new ArgumentNullException("fileName");
-            if (inputStream == null)
-                throw new ArgumentNullException("inputStream");
+	public class HttpPostedFile
+	{
+		/// <summary>
+		/// True if a file was uploaded (FileName is not empty).
+		/// </summary>
+		public bool HasData { get { return !string.IsNullOrEmpty(this.FileName); } }
 
-            ContentLength = contentLength;
-            ContentType = contentType;
-            FileName = fileName;
-            InputStream = inputStream;
-        }
+		public HttpPostedFile(int contentLength, string contentType, string fileName, Stream inputStream)
+		{
+			if (fileName == null)
+				throw new ArgumentNullException("fileName");
+			if (inputStream == null)
+				throw new ArgumentNullException("inputStream");
 
-        public int ContentLength { get; private set; }
+			ContentLength = contentLength;
+			ContentType = contentType;
+			FileName = fileName;
+			InputStream = inputStream;
+		}
 
-        public string ContentType { get; private set; }
+		public int ContentLength { get; private set; }
 
-        public string FileName { get; private set; }
+		public string ContentType { get; private set; }
 
-        public Stream InputStream { get; private set; }
+		public string FileName { get; private set; }
+
+		public Stream InputStream { get; private set; }
 
 		public bool MoveTo(string filePath)
 		{
@@ -40,5 +45,5 @@ namespace NHttp
 
 			return true;
 		}
-    }
+	}
 }
