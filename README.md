@@ -14,4 +14,4 @@ Licensed under LGPL. For more information, see LICENSE.
 
 Credits
 ------------------------------
-Uses [NHttp](https://github.com/pvginkel/NHttp), which is also licensed under LGPL.
+Based on [NHttp](https://github.com/pvginkel/NHttp), which is also licensed under LGPL.
