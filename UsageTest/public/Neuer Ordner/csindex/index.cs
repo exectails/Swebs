@@ -1,15 +1,10 @@
-﻿using NHttp;
+﻿using Swebs;
 using Swebs.RequestHandlers.CSharp;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-public class CSharpIndexTest : IScript
+public class CSharpIndexTest : Controller
 {
-	public string Render(HttpRequestEventArgs args)
+	public override void Handle(HttpRequestEventArgs args, string requestPath, string localPath)
 	{
-		return "C# index";
+		args.Response.Send("C# index");
 	}
 }
