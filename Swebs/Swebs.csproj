@@ -74,7 +74,6 @@
     <Compile Include="RequestHandlers\Error404.cs" />
     <Compile Include="RequestHandlers\FileRequest.cs" />
     <Compile Include="RequestHandlers\RawOutput.cs" />
-    <Compile Include="Server.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
