@@ -39,7 +39,48 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="3rdParty\mustache-sharp\ArgumentCollection.cs" />
+    <Compile Include="3rdParty\mustache-sharp\CompoundGenerator.cs" />
+    <Compile Include="3rdParty\mustache-sharp\ConditionTagDefinition.cs" />
+    <Compile Include="3rdParty\mustache-sharp\ContentTagDefinition.cs" />
+    <Compile Include="3rdParty\mustache-sharp\Context.cs" />
+    <Compile Include="3rdParty\mustache-sharp\ContextParameter.cs" />
+    <Compile Include="3rdParty\mustache-sharp\EachTagDefinition.cs" />
+    <Compile Include="3rdParty\mustache-sharp\ElifTagDefinition.cs" />
+    <Compile Include="3rdParty\mustache-sharp\ElseTagDefinition.cs" />
+    <Compile Include="3rdParty\mustache-sharp\FormatCompiler.cs" />
+    <Compile Include="3rdParty\mustache-sharp\Generator.cs" />
+    <Compile Include="3rdParty\mustache-sharp\IArgument.cs" />
+    <Compile Include="3rdParty\mustache-sharp\IfTagDefinition.cs" />
+    <Compile Include="3rdParty\mustache-sharp\IGenerator.cs" />
+    <Compile Include="3rdParty\mustache-sharp\IndexTagDefinition.cs" />
+    <Compile Include="3rdParty\mustache-sharp\InlineGenerator.cs" />
+    <Compile Include="3rdParty\mustache-sharp\InlineTagDefinition.cs" />
+    <Compile Include="3rdParty\mustache-sharp\KeyFoundEventArgs.cs" />
+    <Compile Include="3rdParty\mustache-sharp\KeyGenerator.cs" />
+    <Compile Include="3rdParty\mustache-sharp\KeyNotFoundEventArgs.cs" />
+    <Compile Include="3rdParty\mustache-sharp\MasterTagDefinition.cs" />
+    <Compile Include="3rdParty\mustache-sharp\NestedContext.cs" />
+    <Compile Include="3rdParty\mustache-sharp\NewlineTagDefinition.cs" />
+    <Compile Include="3rdParty\mustache-sharp\NumberArgument.cs" />
+    <Compile Include="3rdParty\mustache-sharp\PlaceholderArgument.cs" />
+    <Compile Include="3rdParty\mustache-sharp\PlaceholderFoundEventArgs.cs" />
+    <Compile Include="3rdParty\mustache-sharp\PropertyDictionary.cs" />
+    <Compile Include="3rdParty\mustache-sharp\RegexHelper.cs" />
+    <Compile Include="3rdParty\mustache-sharp\Scope.cs" />
+    <Compile Include="3rdParty\mustache-sharp\SetTagDefinition.cs" />
+    <Compile Include="3rdParty\mustache-sharp\StaticGenerator.cs" />
+    <Compile Include="3rdParty\mustache-sharp\StringArgument.cs" />
+    <Compile Include="3rdParty\mustache-sharp\TagDefinition.cs" />
+    <Compile Include="3rdParty\mustache-sharp\TagParameter.cs" />
+    <Compile Include="3rdParty\mustache-sharp\UnlessTagDefinition.cs" />
+    <Compile Include="3rdParty\mustache-sharp\UpcastDictionary.cs" />
+    <Compile Include="3rdParty\mustache-sharp\ValueRequestEventArgs.cs" />
+    <Compile Include="3rdParty\mustache-sharp\VariableArgument.cs" />
+    <Compile Include="3rdParty\mustache-sharp\VariableFoundEventArgs.cs" />
+    <Compile Include="3rdParty\mustache-sharp\WithTagDefinition.cs" />
     <Compile Include="Engines\Engine.cs" />
+    <Compile Include="Engines\HandlebarsEngine.cs" />
     <Compile Include="Engines\HtmlEngine.cs" />
     <Compile Include="HttpClient.cs" />
     <Compile Include="HttpContext.cs" />
@@ -76,6 +117,9 @@
     <Compile Include="RequestHandlers\FileRequest.cs" />
     <Compile Include="RequestHandlers\RawOutput.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="3rdParty\mustache-sharp\LICENSE" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

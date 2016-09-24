@@ -128,6 +128,7 @@ namespace Swebs
 
 			this.Engines = new Dictionary<string, IEngine>();
 			this.Engines.Add("html", new HtmlEngine());
+			this.Engines.Add("hbs", new HandlebarsEngine());
 
 			EndPoint = new IPEndPoint(this.Conf.Host, this.Conf.Port);
 			RequestReceived += this.OnRequestReceived;
