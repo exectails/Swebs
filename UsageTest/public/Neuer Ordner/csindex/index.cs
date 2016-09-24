@@ -14,6 +14,9 @@ public class CSharpIndexTest : Controller
 		sb.AppendLine("Test 2: " + server.GetLocalPath("Neuer Ordner 2/csindex/index.cs") + "<br/>");
 		sb.AppendLine("Test 3: " + server.GetLocalPath("css") + "<br/>");
 		sb.AppendLine("Test 4: " + server.GetLocalPath("test.txt") + "<br/>");
+		sb.AppendLine("Files in css:<br/>");
+		foreach (var filePath in server.GetLocalFilesIn("css"))
+			sb.AppendLine("&nbsp;&nbsp;&nbsp;" + filePath + "<br/>");
 
 		args.Response.Send(sb.ToString());
 	}

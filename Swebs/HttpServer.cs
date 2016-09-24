@@ -489,6 +489,70 @@ namespace Swebs
 		}
 
 		/// <summary>
+		/// Returns paths to all files in given folder, relative to all
+		/// source folders.
+		/// </summary>
+		/// <param name="path"></param>
+		/// <returns></returns>
+		public string[] GetLocalFilesIn(string path)
+		{
+			return this.EnumerateIn(path, Directory.EnumerateFiles);
+		}
+
+		/// <summary>
+		/// Returns paths to all folders in given folder, relative to all
+		/// source folders.
+		/// </summary>
+		/// <param name="path"></param>
+		/// <returns></returns>
+		public string[] GetLocalFoldersIn(string path)
+		{
+			return this.EnumerateIn(path, Directory.EnumerateDirectories);
+		}
+
+		/// <summary>
+		/// Returns paths to all files in given folder, relative to all
+		/// source folders.
+		/// </summary>
+		/// <param name="path"></param>
+		/// <returns></returns>
+		private string[] EnumerateIn(string path, Func<string, IEnumerable<string>> enumFunc)
+		{
+			var requestPath = path.NormalizePath();
+			requestPath = HttpUtil.UriDecode(requestPath);
+			requestPath = requestPath.Trim('/');
+
+			var result = new Dictionary<string, string>();
+
+			foreach (var rootPath in this.SourcePaths)
+			{
+				var localPath = Path.Combine(rootPath, requestPath);
+				localPath = HttpUtil.UriDecode(localPath);
+				localPath = localPath.NormalizePath();
+
+				// Check scope
+				var fullRequestPath = Path.GetFullPath(localPath).NormalizePath().TrimEnd('/');
+				var fullRootPath = Path.GetFullPath(rootPath).NormalizePath().TrimEnd('/');
+				if (!fullRequestPath.StartsWith(fullRootPath))
+					continue;
+
+				if (!Directory.Exists(localPath))
+					continue;
+
+				foreach (var filePath in enumFunc(localPath))
+				{
+					var fileName = Path.GetFileName(filePath);
+					var relativePath = Path.Combine(requestPath, fileName).NormalizePath();
+
+					if (!result.ContainsKey(relativePath))
+						result[relativePath] = filePath.NormalizePath();
+				}
+			}
+
+			return result.Values.ToArray();
+		}
+
+		/// <summary>
 		/// Checks given path is a directory that contains an index file.
 		/// If so, the path is set to that index file's path and true
 		/// is returned.
