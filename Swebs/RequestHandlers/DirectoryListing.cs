@@ -25,10 +25,11 @@ namespace Swebs.RequestHandlers
 		{
 			var request = args.Request;
 			var response = args.Response;
+			var server = args.Context.Server;
 
 			response.ContentType = "text/html";
 
-			var list = this.RenderDirectoryList(requestPath, localPath);
+			var list = this.RenderDirectoryList(server, requestPath, localPath);
 			using (var writer = new StreamWriter(response.OutputStream))
 				writer.Write(list);
 		}
@@ -39,7 +40,7 @@ namespace Swebs.RequestHandlers
 		/// <param name="requestPath"></param>
 		/// <param name="localPath"></param>
 		/// <returns></returns>
-		private string RenderDirectoryList(string requestPath, string localPath)
+		private string RenderDirectoryList(HttpServer server, string requestPath, string localPath)
 		{
 			var directoryName = "/" + requestPath;
 			if (string.IsNullOrWhiteSpace(directoryName))
@@ -80,7 +81,7 @@ namespace Swebs.RequestHandlers
 				sb.AppendLine("<td></td>");
 				sb.AppendLine("</tr>");
 
-				foreach (var filePath in Directory.EnumerateDirectories(localPath, "*", SearchOption.TopDirectoryOnly))
+				foreach (var filePath in server.GetLocalFoldersIn(requestPath))
 				{
 					var name = Path.GetFileName(filePath);
 					var linkPath = "/" + Path.Combine(requestPath, name).NormalizePath();
@@ -92,7 +93,7 @@ namespace Swebs.RequestHandlers
 					sb.AppendLine("</tr>");
 				}
 
-				foreach (var filePath in Directory.EnumerateFiles(localPath, "*", SearchOption.TopDirectoryOnly))
+				foreach (var filePath in server.GetLocalFilesIn(requestPath))
 				{
 					var name = Path.GetFileName(filePath);
 					var linkPath = "/" + Path.Combine(requestPath, name).NormalizePath();

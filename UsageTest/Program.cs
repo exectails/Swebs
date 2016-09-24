@@ -16,7 +16,7 @@ namespace UsageTest
 		{
 			var webConf = new Configuration();
 			webConf.Port = 8181;
-			//webConf.SourcePaths.Add("public2");
+			webConf.SourcePaths.Add("public2");
 			webConf.SourcePaths.Add("public");
 			webConf.AllowDirectoryListing = true;
 
