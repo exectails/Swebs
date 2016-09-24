@@ -1,4 +1,5 @@
-﻿using Swebs.RequestHandlers;
+﻿using Swebs.Engines;
+using Swebs.RequestHandlers;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -50,6 +51,11 @@ namespace Swebs
 		/// The request handler for non-existent or invalid files.
 		/// </summary>
 		public IRequestHandler Error404Handler { get; set; }
+
+		/// <summary>
+		/// Collection of rendering engines.
+		/// </summary>
+		public Dictionary<string, IEngine> Engines { get; private set; }
 
 		public HttpServerState State
 		{
@@ -119,6 +125,9 @@ namespace Swebs
 			this.FileAccessHandler = new FileRequest(this.Conf.FileTypeHandlers.ToDictionary(a => a.Key, b => b.Value));
 			this.DirectoryListingHandler = new DirectoryListing();
 			this.Error404Handler = new Error404();
+
+			this.Engines = new Dictionary<string, IEngine>();
+			this.Engines.Add("html", new HtmlEngine());
 
 			EndPoint = new IPEndPoint(this.Conf.Host, this.Conf.Port);
 			RequestReceived += this.OnRequestReceived;
@@ -501,6 +510,19 @@ namespace Swebs
 			}
 
 			return false;
+		}
+
+		/// <summary>
+		/// Returns string with given name, or null if no engine was set for
+		/// the name.
+		/// </summary>
+		/// <param name="name"></param>
+		/// <returns></returns>
+		public IEngine GetEngine(string name)
+		{
+			IEngine result;
+			this.Engines.TryGetValue(name, out result);
+			return result;
 		}
 	}
 
