@@ -416,7 +416,9 @@ namespace Swebs
 		/// <param name="args"></param>
 		private void OnRequestReceived(object sender, HttpRequestEventArgs args)
 		{
-			var requestPath = args.Request.Path.NormalizePath();
+			var path = args.Request.Path;
+
+			var requestPath = path.NormalizePath();
 			requestPath = HttpUtil.UriDecode(requestPath);
 			requestPath = requestPath.Trim('/');
 
@@ -436,21 +438,33 @@ namespace Swebs
 					continue;
 				}
 
-				// Check index files
-				var fileExists = File.Exists(localPath);
-				if (!fileExists)
-					fileExists = this.TestIndexNames(this.Conf.IndexNames, ref localPath);
-
 				// Handle request
-				if (fileExists)
+				if (File.Exists(localPath))
 				{
 					this.FileAccessHandler.Handle(args, requestPath, localPath);
 					return;
 				}
-				else if (this.Conf.AllowDirectoryListing && Directory.Exists(localPath))
+				else if (Directory.Exists(localPath))
 				{
-					this.DirectoryListingHandler.Handle(args, requestPath, localPath);
-					return;
+					if (this.Conf.DirectorySlash && !path.EndsWith("/"))
+					{
+						args.Response.Redirect(path + "/");
+						return;
+					}
+
+					// Check index files
+					if (this.TestIndexNames(this.Conf.IndexNames, ref localPath))
+					{
+						this.FileAccessHandler.Handle(args, requestPath, localPath);
+						return;
+					}
+
+					// List directory contents
+					if (this.Conf.AllowDirectoryListing)
+					{
+						this.DirectoryListingHandler.Handle(args, requestPath, localPath);
+						return;
+					}
 				}
 			}
 

@@ -54,6 +54,15 @@ namespace Swebs
 		public Dictionary<string, IRequestHandler> FileTypeHandlers { get; set; }
 
 		/// <summary>
+		/// If true, server adds trailing slash to requested URLs,
+		/// redirecting the client there.
+		/// </summary>
+		/// <example>
+		/// http://127.0.0.1/test -> http://127.0.0.1/test/
+		/// </example>
+		public bool DirectorySlash { get; set; }
+
+		/// <summary>
 		/// Creates new Configuration instance, while setting default values
 		/// for all options.
 		/// </summary>
@@ -64,6 +73,7 @@ namespace Swebs
 
 			this.SourcePaths = new List<string>();
 			this.AllowDirectoryListing = false;
+			this.DirectorySlash = true;
 
 			this.IndexNames = new List<string>();
 			this.IndexNames.Add("index.cs");
