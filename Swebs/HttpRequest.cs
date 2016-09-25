@@ -41,6 +41,8 @@ namespace Swebs
 
 		public NameValueCollection QueryString { get; private set; }
 
+		public string RawQueryString { get; private set; }
+
 		public string RawUrl { get; private set; }
 
 		public string RequestType { get; private set; }
@@ -263,7 +265,10 @@ namespace Swebs
 
 			QueryString = new NameValueCollection();
 			if (parts.Length == 2)
+			{
+				RawQueryString = parts[1];
 				HttpUtil.UrlDecodeTo(parts[1], QueryString);
+			}
 
 			string host;
 			string port;
