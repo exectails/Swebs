@@ -84,11 +84,11 @@ namespace Swebs
 
 			this.FileTypeHandlers.Add("", new RawOutput("application/octet-stream"));
 
-			this.FileTypeHandlers.Add(".jpg", new RawOutput("image/jpeg"));
-			this.FileTypeHandlers.Add(".jpeg", new RawOutput("image/jpeg"));
-			this.FileTypeHandlers.Add(".gif", new RawOutput("image/gif"));
-			this.FileTypeHandlers.Add(".png", new RawOutput("image/png"));
-			this.FileTypeHandlers.Add(".ico", new RawOutput("image/x-icon"));
+			this.FileTypeHandlers.Add(".jpg", new RawOutput("image/jpeg", "public, max-age=3600"));
+			this.FileTypeHandlers.Add(".jpeg", new RawOutput("image/jpeg", "public, max-age=3600"));
+			this.FileTypeHandlers.Add(".gif", new RawOutput("image/gif", "public, max-age=3600"));
+			this.FileTypeHandlers.Add(".png", new RawOutput("image/png", "public, max-age=3600"));
+			this.FileTypeHandlers.Add(".ico", new RawOutput("image/x-icon", "public, max-age=3600"));
 
 			this.FileTypeHandlers.Add(".htm", new RawOutput("text/html"));
 			this.FileTypeHandlers.Add(".html", new RawOutput("text/html"));

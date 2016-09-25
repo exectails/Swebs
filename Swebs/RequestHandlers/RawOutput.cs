@@ -19,12 +19,22 @@ namespace Swebs.RequestHandlers
 		public string ContentType { get; private set; }
 
 		/// <summary>
+		/// The Cache-Control to set when responding.
+		/// </summary>
+		public string CacheControl { get; private set; }
+
+		/// <summary>
 		/// Creatues new RawOutput instance for the given content type.
 		/// </summary>
 		/// <param name="contentType"></param>
-		public RawOutput(string contentType)
+		/// <param name="cacheControl"></param>
+		/// <example>
+		/// 
+		/// </example>
+		public RawOutput(string contentType, string cacheControl = "private")
 		{
 			this.ContentType = contentType;
+			this.CacheControl = cacheControl;
 		}
 
 		/// <summary>
@@ -38,8 +48,8 @@ namespace Swebs.RequestHandlers
 			var request = args.Request;
 			var response = args.Response;
 
-			// Set content type
 			response.ContentType = this.ContentType;
+			response.CacheControl = this.CacheControl;
 
 			// Send file
 			using (var fs = new FileStream(localPath, FileMode.Open, FileAccess.Read, FileShare.Read))
