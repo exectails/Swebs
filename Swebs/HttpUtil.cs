@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Swebs
 {
-	internal static class HttpUtil
+	public static class HttpUtil
 	{
 		private static readonly int _longestHtmlEntity;
 		private static readonly Dictionary<int, string> _htmlEntitiesByNumber = new Dictionary<int, string>();
