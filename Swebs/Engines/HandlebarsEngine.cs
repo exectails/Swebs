@@ -41,12 +41,15 @@ namespace Swebs.Engines
 		/// <returns></returns>
 		protected Generator GetGenerator(string template)
 		{
-			if (_cache.ContainsKey(template))
-				return _cache[template];
+			lock (_cache)
+			{
+				if (_cache.ContainsKey(template))
+					return _cache[template];
 
-			var generator = _compiler.Compile(template);
+				var generator = _compiler.Compile(template);
 
-			return (_cache[template] = generator);
+				return (_cache[template] = generator);
+			}
 		}
 
 		/// <summary>
