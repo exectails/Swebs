@@ -75,6 +75,16 @@ namespace Swebs
 		/// </summary>
 		public int HttpPort { get { return this.LocalEndPoint.Port; } }
 
+		/// <summary>
+		/// Client's IP.
+		/// </summary>
+		public string ClientIp { get { return this.RemoteEndPoint.Address.ToString(); } }
+
+		/// <summary>
+		/// Client's port.
+		/// </summary>
+		public int ClientPort { get { return this.RemoteEndPoint.Port; } }
+
 		internal HttpRequest(HttpClient client)
 		{
 			ParseHeaders(client);
