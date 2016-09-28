@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Swebs.RequestHandlers.CSharp
@@ -20,6 +21,7 @@ namespace Swebs.RequestHandlers.CSharp
 	public class CSharpScript : IRequestHandler
 	{
 		private Dictionary<string, IRequestHandler> _cache = new Dictionary<string, IRequestHandler>();
+		private Regex _referencesRegex = new Regex(@"^\/\/#reference (?<fileName>.*)$", RegexOptions.Compiled | RegexOptions.Multiline);
 
 		/// <summary>
 		/// References passed to the compiler.
@@ -122,17 +124,33 @@ namespace Swebs.RequestHandlers.CSharp
 		{
 			script = null;
 
+			// Source
+			var source = File.ReadAllText(filePath);
+			var fileReferences = this.FindReferences(source);
+
+			// References
 			var entryAssembly = Assembly.GetEntryAssembly();
 			var loadedAssemblies = AppDomain.CurrentDomain.GetAssemblies();
-			var referencedAssemblies = entryAssembly.GetReferencedAssemblies().Select(a => loadedAssemblies.SingleOrDefault(b => b.FullName == a.FullName));
-			var references = referencedAssemblies.Where(a => !a.IsDynamic).Select(a => a.Location).ToList();
 
-			foreach (var defaultReference in this.References)
+			// Assemblies referenced in entry
+			var referencedAssemblies = entryAssembly.GetReferencedAssemblies().Select(a => loadedAssemblies.SingleOrDefault(b => b.FullName == a.FullName));
+			var references = referencedAssemblies.Where(a => a != null && !a.IsDynamic).Select(a => a.Location).ToList();
+
+			// Default references
+			foreach (var reference in this.References)
 			{
-				if (!references.Any(a => a.Contains(defaultReference)))
-					references.Add(defaultReference);
+				if (!references.Any(a => a.Contains(reference)))
+					references.Add(reference);
 			}
 
+			// File references
+			foreach (var reference in fileReferences)
+			{
+				if (!references.Any(a => a.Contains(reference)))
+					references.Add(reference);
+			}
+
+			// Parameters
 			var parameters = new CompilerParameters();
 			foreach (var reference in references)
 				parameters.ReferencedAssemblies.Add(reference);
@@ -145,7 +163,7 @@ namespace Swebs.RequestHandlers.CSharp
 
 			// Compile
 			var provider = CodeDomProvider.CreateProvider("CSharp");
-			var results = provider.CompileAssemblyFromFile(parameters, filePath);
+			var results = provider.CompileAssemblyFromSource(parameters, source);
 			if (results.Errors.Count != 0)
 			{
 				script = new ErrorScript(results.Errors);
@@ -160,6 +178,22 @@ namespace Swebs.RequestHandlers.CSharp
 			script = Activator.CreateInstance(type) as IRequestHandler;
 
 			return (script != null);
+		}
+
+		/// <summary>
+		/// Returns all file names the script wants to reference.
+		/// </summary>
+		/// <param name="source"></param>
+		/// <returns></returns>
+		private List<string> FindReferences(string source)
+		{
+			var result = new List<string>();
+
+			var matches = _referencesRegex.Matches(source);
+			foreach (Match match in matches)
+				result.Add(match.Groups["fileName"].Value.Trim());
+
+			return result;
 		}
 	}
 }
