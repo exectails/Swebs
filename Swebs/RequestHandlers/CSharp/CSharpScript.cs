@@ -21,6 +21,7 @@ namespace Swebs.RequestHandlers.CSharp
 	public class CSharpScript : IRequestHandler
 	{
 		private Dictionary<string, IRequestHandler> _cache = new Dictionary<string, IRequestHandler>();
+		private Dictionary<string, DateTime> _cacheLast = new Dictionary<string, DateTime>();
 		private Regex _referencesRegex = new Regex(@"^\/\/#reference (?<fileName>.*)$", RegexOptions.Compiled | RegexOptions.Multiline);
 
 		/// <summary>
@@ -93,9 +94,15 @@ namespace Swebs.RequestHandlers.CSharp
 			filePath = filePath.Replace('/', Path.DirectorySeparatorChar);
 
 			// Try to load script from cache.
-			IRequestHandler script;
+			IRequestHandler script = null;
 			lock (_cache)
-				_cache.TryGetValue(filePath, out script);
+			{
+				// Only load cached file if file hasn't changed since
+				// last caching.
+				DateTime last;
+				if (_cacheLast.TryGetValue(filePath, out last) && (!File.Exists(filePath) || File.GetLastWriteTime(filePath) < last))
+					_cache.TryGetValue(filePath, out script);
+			}
 
 			// If script wasn't found in cache, try to compile it.
 			if (script == null)
@@ -108,7 +115,10 @@ namespace Swebs.RequestHandlers.CSharp
 
 			// If a script was successfully found, cache it.
 			lock (_cache)
+			{
+				_cacheLast[filePath] = DateTime.Now;
 				_cache[filePath] = script;
+			}
 
 			return script;
 		}
