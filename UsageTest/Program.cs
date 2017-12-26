@@ -26,6 +26,8 @@ namespace UsageTest
 			server.Start();
 
 			//Process.Start("http://127.0.0.1:8181");
+			//var wc = new WebClient();
+			//wc.DownloadString("http://127.0.0.1:8181/\x00\x01\x02\x03");
 
 			Console.WriteLine("Press [Return] to close.");
 			Console.ReadLine();
