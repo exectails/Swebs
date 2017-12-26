@@ -16,7 +16,7 @@ namespace Swebs
 	{
 		private static readonly ILog Log = LogManager.GetLogger(typeof(HttpServer));
 
-		private readonly static char[] _invalidPathCharacters = Path.GetInvalidFileNameChars();
+		private readonly static char[] _invalidPathCharacters = Path.GetInvalidPathChars();
 
 		private bool _disposed;
 		private TcpListener _listener;
@@ -428,6 +428,7 @@ namespace Swebs
 			{
 				Log.Warn("Invalid path '{0}' requested by '{1}:{2}'.", path, args.Request.ClientIp, args.Request.ClientPort);
 				args.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+				//Console.WriteLine("Invalid: " + path);
 				return;
 			}
 
