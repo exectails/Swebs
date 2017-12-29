@@ -432,9 +432,27 @@ namespace Swebs
 			requestPath = HttpUtil.UriDecode(requestPath);
 			requestPath = requestPath.Trim('/');
 
+			// Check for invalid characters in path
 			if (requestPath.IndexOfAny(_invalidPathCharacters) != -1)
 			{
-				Log.Warn("Invalid path '{0}' requested by '{1}:{2}'.", path, args.Request.ClientIp, args.Request.ClientPort);
+				Log.Warn("Invalid path (chr) '{0}' requested by '{1}:{2}'.", path, args.Request.ClientIp, args.Request.ClientPort);
+				args.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+				//Console.WriteLine("Invalid: " + path);
+				return;
+			}
+
+			// Check validity of path
+			// It would probably be better not to use Path, since it's not
+			// designed with URLs in mind, but for now this will prevent
+			// unhandled exceptions because Path couldn't handle an "invalid"
+			// character like a colon.
+			try
+			{
+				Path.GetFullPath(requestPath);
+			}
+			catch (NotSupportedException)
+			{
+				Log.Warn("Invalid path (ex) '{0}' requested by '{1}:{2}'.", path, args.Request.ClientIp, args.Request.ClientPort);
 				args.Response.StatusCode = (int)HttpStatusCode.BadRequest;
 				//Console.WriteLine("Invalid: " + path);
 				return;
