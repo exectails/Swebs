@@ -77,10 +77,18 @@ namespace Swebs
 
 		protected virtual void OnRequestReceived(HttpRequestEventArgs e)
 		{
-			var ev = RequestReceived;
-
-			if (ev != null)
-				ev(this, e);
+			foreach (HttpRequestEventHandler handler in RequestReceived.GetInvocationList())
+			{
+				try
+				{
+					handler.Invoke(this, e);
+				}
+				catch (Exception ex)
+				{
+					ex.Source = handler.Method.Module + "/" + handler.Method.DeclaringType.Name + "/" + handler.Method.Name;
+					RaiseUnhandledException(e.Context, ex);
+				}
+			}
 		}
 
 		public event HttpExceptionEventHandler UnhandledException;
