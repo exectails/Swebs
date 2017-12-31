@@ -448,7 +448,8 @@ namespace Swebs
 			// character like a colon.
 			try
 			{
-				Path.GetFullPath(requestPath);
+				if (!string.IsNullOrWhiteSpace(requestPath))
+					Path.GetFullPath(requestPath);
 			}
 			catch (NotSupportedException)
 			{
