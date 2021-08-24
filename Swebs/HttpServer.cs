@@ -33,7 +33,7 @@ namespace Swebs
 		/// <summary>
 		/// The server's root paths.
 		/// </summary>
-		internal List<string> SourcePaths { get; private set; }
+		public List<string> SourcePaths { get; private set; }
 
 		/// <summary>
 		/// The request handler for normal files.
